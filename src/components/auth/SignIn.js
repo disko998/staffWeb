@@ -1,63 +1,103 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { signIn } from "../../store/actions/authActions";
-import { Redirect } from "react-router-dom";
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import { signIn } from '../../store/actions/authActions'
+import { Redirect } from 'react-router-dom'
+import { makeStyles, Grid, Typography, TextField, Button, Card } from '@material-ui/core'
+import LockOpenIcon from '@material-ui/icons/LockOpen'
 
-class SignIn extends Component {
-  state = {
-    email: "",
-    password: ""
-  };
-  handleChange = e => {
-    this.setState({
-      [e.target.id]: e.target.value
-    });
-  };
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.signIn(this.state);
-  };
-  render() {
-    const { authError, auth } = this.props;
-    if (auth.uid) return <Redirect to="/" />;
+const useStyle = makeStyles(theme => ({
+    formWrapper: {
+        margin: 'auto',
+        marginTop: 60,
+    },
+    form: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignContent: 'center',
+        flexDirection: 'column',
+        margin: 0,
+    },
+    title: {
+        textAlign: 'center',
+        textTransform: 'uppercase',
+    },
+    input: {
+        margin: '15px 0',
+    },
+    error: {
+        margin: '15px 0',
+        color: 'red',
+        textAlign: 'center',
+    },
+}))
+
+const SignIn = ({ authError, auth, signIn }) => {
+    const [credentials, setCredentials] = useState({ email: '', password: '' })
+    const classes = useStyle()
+
+    const handleChange = e => {
+        setCredentials({
+            ...credentials,
+            [e.target.id]: e.target.value,
+        })
+    }
+    const handleSubmit = e => {
+        e.preventDefault()
+        signIn(credentials)
+    }
+
+    if (auth.uid) return <Redirect to='/' />
     return (
-      <div className="container">
-        <form className="white" onSubmit={this.handleSubmit}>
-          <h5 className="grey-text text-darken-3">Sign In</h5>
-          <div className="input-field">
-            <label htmlFor="email">Email</label>
-            <input type="email" id="email" onChange={this.handleChange} />
-          </div>
-          <div className="input-field">
-            <label htmlFor="password">Password</label>
-            <input type="password" id="password" onChange={this.handleChange} />
-          </div>
-          <div className="input-field">
-            <button className="btn">Login</button>
-            <div className="center red-text">
-              {authError ? <p>{authError}</p> : null}
-            </div>
-          </div>
-        </form>
-      </div>
-    );
-  }
+        <Grid xs={10} md={6} className={classes.formWrapper}>
+            <Card elevation={2}>
+                <form className={classes.form} onSubmit={handleSubmit}>
+                    <Typography className={classes.title} variant='h4'>
+                        Sign In
+                    </Typography>
+                    <TextField
+                        required
+                        label='email'
+                        id='email'
+                        onChange={handleChange}
+                        className={classes.input}
+                    />
+                    <TextField
+                        type='password'
+                        required
+                        label='password'
+                        id='password'
+                        onChange={handleChange}
+                        className={classes.input}
+                    />
+                    <Button
+                        className={classes.button}
+                        variant='contained'
+                        size='large'
+                        color='primary'
+                        className={classes.input}
+                        startIcon={<LockOpenIcon />}
+                        onClick={handleSubmit}
+                    >
+                        Login
+                    </Button>
+                    {authError && <div className={classes.error}>{authError}</div>}
+                </form>
+            </Card>
+        </Grid>
+    )
 }
 
 const mapStateToProps = state => {
-  return {
-    authError: state.auth.authError,
-    auth: state.firebase.auth
-  };
-};
+    return {
+        authError: state.auth.authError,
+        auth: state.firebase.auth,
+    }
+}
 
 const mapDispatchToProps = dispatch => {
-  return {
-    signIn: creds => dispatch(signIn(creds))
-  };
-};
+    return {
+        signIn: creds => dispatch(signIn(creds)),
+    }
+}
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SignIn);
+export default connect(mapStateToProps, mapDispatchToProps)(SignIn)

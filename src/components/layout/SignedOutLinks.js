@@ -27,12 +27,12 @@ const SignedOutLinks = () => {
         <ButtonGroup variant='text' aria-label='text primary button group'>
             <Button>
                 <NavLink className={classes.link} to='/signin'>
-                    Login
+                    Sign in
                 </NavLink>
             </Button>
             <Button>
                 <NavLink className={classes.link} to='/signup'>
-                    Register
+                    Sign up
                 </NavLink>
             </Button>
         </ButtonGroup>
