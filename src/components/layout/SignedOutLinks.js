@@ -1,15 +1,42 @@
 import React from 'react'
+import Button from '@material-ui/core/Button'
+import ButtonGroup from '@material-ui/core/ButtonGroup'
+import { makeStyles } from '@material-ui/core/styles'
 import { NavLink } from 'react-router-dom'
 
+const useStyles = makeStyles(theme => ({
+    root: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        '& > *': {
+            margin: theme.spacing(1),
+        },
+    },
+    link: {
+        color: '#fff',
+        '&:hover': {
+            color: '#fff',
+        },
+    },
+}))
+
 const SignedOutLinks = () => {
-  return (
-    <div>
-      <ul className="right">
-        <li><NavLink to='/signup'>Signup</NavLink></li>
-        <li><NavLink to='/signin'>Login</NavLink></li>
-      </ul>
-    </div>
-  )
+    const classes = useStyles()
+    return (
+        <ButtonGroup variant='text' aria-label='text primary button group'>
+            <Button>
+                <NavLink className={classes.link} to='/signin'>
+                    Login
+                </NavLink>
+            </Button>
+            <Button>
+                <NavLink className={classes.link} to='/signup'>
+                    Register
+                </NavLink>
+            </Button>
+        </ButtonGroup>
+    )
 }
 
 export default SignedOutLinks
