@@ -7,7 +7,6 @@ import {
     Typography,
     TextField,
     Button,
-    makeStyles,
     FormControl,
     RadioGroup,
     Radio,
@@ -19,32 +18,7 @@ import {
 } from '@material-ui/core'
 
 import { signUp } from '../../store/actions/authActions'
-
-const useStyle = makeStyles(theme => ({
-    formWrapper: {
-        margin: 'auto',
-        marginTop: 60,
-    },
-    form: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignContent: 'center',
-        flexDirection: 'column',
-        margin: 0,
-    },
-    title: {
-        textAlign: 'center',
-        textTransform: 'uppercase',
-    },
-    input: {
-        margin: '15px 0',
-    },
-    error: {
-        margin: '15px 0',
-        color: 'red',
-        textAlign: 'center',
-    },
-}))
+import { useStyle } from './Styles'
 
 const SignUp = ({ auth, authError, signUp }) => {
     const classes = useStyle()
