@@ -1,197 +1,221 @@
-import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { signUp } from "../../store/actions/authActions";
+import React, { useState, useEffect } from 'react'
+import { Redirect } from 'react-router-dom'
+import { connect } from 'react-redux'
+import {
+    Card,
+    Grid,
+    Typography,
+    TextField,
+    Button,
+    makeStyles,
+    FormControl,
+    RadioGroup,
+    Radio,
+    FormControlLabel,
+    FormLabel,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@material-ui/core'
 
-class SignUp extends Component {
-  state = {
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    isSingleSite: "true",
-    isSingleDep: "true",
-    accountName: "",
-    orgType: "",
-    type: "agency",
-    latitude: "",
-    longitude: ""
-  };
+import { signUp } from '../../store/actions/authActions'
 
-  componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
-      position => this.setState({ 
-        latitude: position.coords.latitude, 
-        longitude: position.coords.longitude
-      }), 
-      err => alert("Please share your location")
-    );
-  }
-  
-  handleChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value
-    });
-    console.log(this.state);
-  };
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.signUp(this.state);
-  };
-  render() {
-    const { auth, authError } = this.props;
-    if (auth.uid) return <Redirect to="/" />;
+const useStyle = makeStyles(theme => ({
+    formWrapper: {
+        margin: 'auto',
+        marginTop: 60,
+    },
+    form: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignContent: 'center',
+        flexDirection: 'column',
+        margin: 0,
+    },
+    title: {
+        textAlign: 'center',
+        textTransform: 'uppercase',
+    },
+    input: {
+        margin: '15px 0',
+    },
+    error: {
+        margin: '15px 0',
+        color: 'red',
+        textAlign: 'center',
+    },
+}))
+
+const SignUp = ({ auth, authError, signUp }) => {
+    const classes = useStyle()
+    const [userData, setUserData] = useState({
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        isSingleSite: 'true',
+        isSingleDep: 'true',
+        accountName: '',
+        orgType: '',
+        type: 'agency',
+        latitude: '',
+        longitude: '',
+    })
+
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition(
+            position =>
+                setUserData({
+                    ...userData,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                }),
+            err => alert('Please share your location'),
+        )
+    }, [])
+
+    const handleChange = e => {
+        setUserData({
+            ...userData,
+            [e.target.name]: e.target.value,
+        })
+    }
+    const handleSubmit = e => {
+        e.preventDefault()
+        signUp(userData)
+    }
+
+    if (auth.uid) return <Redirect to='/' />
+
     return (
-      <div className="container">
-        <form className="white" onSubmit={this.handleSubmit}>
-          <h5 className="grey-text text-darken-3">Sign Up</h5>
-          <div className="input-field">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="firstName">First Name</label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="lastName">Last Name</label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="input-field">
-            <label htmlFor="accountName">Account Name</label>
-            <input
-              type="text"
-              id="accountName"
-              name="accountName"
-              onChange={this.handleChange}
-            />
-          </div>
-          <table>
-            <tbody>
-              <tr>
-                <td>
-                  <label>
-                    <input
-                      id="singleSite"
-                      name="isSingleSite"
-                      type="radio"
-                      value="true"
-                      checked={this.state.isSingleSite === "true"}
-                      onChange={this.handleChange}
+        <Grid xs={12} md={10} className={classes.formWrapper}>
+            <Card elevation={2}>
+                <form className={classes.form} onSubmit={handleSubmit}>
+                    <Typography className={classes.title} variant='h4'>
+                        Sign Up
+                    </Typography>
+                    <TextField
+                        required
+                        label='Email'
+                        name='email'
+                        onChange={handleChange}
+                        className={classes.input}
                     />
-                    <span>Single Site</span>
-                  </label>
-                </td>
-                <td>
-                  <label>
-                    <input
-                      id="multiSite"
-                      name="isSingleSite"
-                      type="radio"
-                      value="false"
-                      checked={this.state.isSingleSite === "false"}
-                      onChange={this.handleChange}
+                    <TextField
+                        type='password'
+                        required
+                        label='Password'
+                        name='password'
+                        onChange={handleChange}
+                        className={classes.input}
                     />
-                    <span>Multi Site</span>
-                  </label>
-                </td>
-              </tr>
-
-              <tr>
-                <td>
-                  <label>
-                    <input
-                      id="singleDep"
-                      name="isSingleDep"
-                      type="radio"
-                      value="true"
-                      checked={this.state.isSingleDep === "true"}
-                      onChange={this.handleChange}
+                    <TextField
+                        required
+                        label='First Name'
+                        name='firstName'
+                        onChange={handleChange}
+                        className={classes.input}
                     />
-                    <span>Single Department</span>
-                  </label>
-                </td>
-                <td>
-                  <label>
-                    <input
-                      id="multiDep"
-                      name="isSingleDep"
-                      type="radio"
-                      value="false"
-                      checked={this.state.isSingleDep === "false"}
-                      onChange={this.handleChange}
+                    <TextField
+                        required
+                        label='Last Name'
+                        name='lastName'
+                        onChange={handleChange}
+                        className={classes.input}
                     />
-                    <span>Multi Department</span>
-                  </label>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="input-field">
-            <select
-              name="orgType"
-              onChange={this.handleChange}
-              className="browser-default"
-              defaultValue={"DEFAULT"}
-            >
-              <option value="DEFAULT" disabled>
-                Please select your orgnazation type
-              </option>
-              <option value="hospital">Hospital</option>
-              <option value="clinic">Clinic</option>
-              <option value="careHome">Care Home</option>
-            </select>
-          </div>
-          <div className="input-field">
-            <button className="btn">Sign Up</button>
-            <div className="center red-text">
-              {authError ? <p>{authError}</p> : null}
-            </div>
-          </div>
-        </form>
-      </div>
-    );
-  }
+                    <TextField
+                        required
+                        label='Account Name'
+                        name='accountName'
+                        onChange={handleChange}
+                        className={classes.input}
+                    />
+                    <FormControl required component='fieldset' className={classes.input}>
+                        <FormLabel component='legend'>Site</FormLabel>
+                        <RadioGroup
+                            row
+                            aria-label='isSingleSite'
+                            name='isSingleSite'
+                            value={userData.isSingleSite}
+                            onChange={handleChange}
+                        >
+                            <FormControlLabel
+                                value={'true'}
+                                control={<Radio />}
+                                label='Single Site'
+                            />
+                            <FormControlLabel
+                                value={'false'}
+                                control={<Radio />}
+                                label='Multi Site'
+                            />
+                        </RadioGroup>
+                    </FormControl>
+                    <FormControl required component='fieldset' className={classes.input}>
+                        <FormLabel component='legend'>Department</FormLabel>
+                        <RadioGroup
+                            row
+                            aria-label='isSingleDep'
+                            name='isSingleDep'
+                            value={userData.isSingleDep}
+                            onChange={handleChange}
+                        >
+                            <FormControlLabel
+                                value='true'
+                                control={<Radio />}
+                                label='Single Department'
+                            />
+                            <FormControlLabel
+                                value='false'
+                                control={<Radio />}
+                                label='Multi Department'
+                            />
+                        </RadioGroup>
+                    </FormControl>
+                    <FormControl required className={classes.formControl}>
+                        <InputLabel id='demo-simple-select-label'>
+                            Please select your orgnazation type
+                        </InputLabel>
+                        <Select
+                            required
+                            labelId='organization type'
+                            name='orgType'
+                            value={userData.orgType}
+                            onChange={handleChange}
+                        >
+                            <MenuItem value='hospital'>Hospital</MenuItem>
+                            <MenuItem value='clinic'>Clinic</MenuItem>
+                            <MenuItem value='careHome'>Care Home</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Button
+                        className={classes.button}
+                        variant='contained'
+                        size='large'
+                        color='primary'
+                        className={classes.input}
+                        onClick={handleSubmit}
+                    >
+                        Register
+                    </Button>
+                    {authError && <div className={classes.error}>{authError}</div>}
+                </form>
+            </Card>
+        </Grid>
+    )
 }
 
 const mapStateToProps = state => {
-  return {
-    auth: state.firebase.auth,
-    authError: state.auth.authError
-  };
-};
+    return {
+        auth: state.firebase.auth,
+        authError: state.auth.authError,
+    }
+}
 
 const mapDispatchToProps = dispatch => {
-  return {
-    signUp: creds => dispatch(signUp(creds))
-  };
-};
+    return {
+        signUp: creds => dispatch(signUp(creds)),
+    }
+}
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SignUp);
+export default connect(mapStateToProps, mapDispatchToProps)(SignUp)

@@ -47,6 +47,7 @@ const SignIn = ({ authError, auth, signIn }) => {
     }
 
     if (auth.uid) return <Redirect to='/' />
+
     return (
         <Grid xs={10} md={6} className={classes.formWrapper}>
             <Card elevation={2}>
@@ -55,22 +56,25 @@ const SignIn = ({ authError, auth, signIn }) => {
                         Sign In
                     </Typography>
                     <TextField
+                        error={authError}
                         required
-                        label='email'
+                        label='Email'
                         id='email'
                         onChange={handleChange}
                         className={classes.input}
                     />
                     <TextField
+                        error={authError}
                         type='password'
                         required
-                        label='password'
+                        label='Password'
                         id='password'
                         onChange={handleChange}
                         className={classes.input}
                     />
                     <Button
-                        className={classes.button}
+                        type='submit'
+                        className={classes.input}
                         variant='contained'
                         size='large'
                         color='primary'
