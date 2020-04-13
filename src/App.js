@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 
 import RootRouter from './Router'
-import Navbar from './components/layout/Navbar'
+import Navbar from './components/navigation/Navbar'
 import { Container } from '@material-ui/core'
 
 class App extends Component {
