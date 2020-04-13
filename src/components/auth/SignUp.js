@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Redirect, withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import {
     Card,
@@ -17,10 +17,13 @@ import {
     MenuItem,
 } from '@material-ui/core'
 
+import AssignmentIndIcon from '@material-ui/icons/AssignmentInd'
+import LockOpenIcon from '@material-ui/icons/LockOpen'
+
 import { signUp } from '../../store/actions/authActions'
 import { useStyle } from './Styles'
 
-const SignUp = ({ auth, authError, signUp }) => {
+const SignUp = ({ auth, authError, signUp, history }) => {
     const classes = useStyle()
     const [userData, setUserData] = useState({
         email: '',
@@ -58,6 +61,8 @@ const SignUp = ({ auth, authError, signUp }) => {
         e.preventDefault()
         signUp(userData)
     }
+
+    const redirectToSignIn = e => history.push('/signin')
 
     if (auth.uid) return <Redirect to='/' />
 
@@ -146,7 +151,7 @@ const SignUp = ({ auth, authError, signUp }) => {
                             />
                         </RadioGroup>
                     </FormControl>
-                    <FormControl required className={classes.formControl}>
+                    <FormControl required className={classes.input}>
                         <InputLabel id='demo-simple-select-label'>
                             Please select your orgnazation type
                         </InputLabel>
@@ -164,13 +169,27 @@ const SignUp = ({ auth, authError, signUp }) => {
                     </FormControl>
                     <Button
                         className={classes.button}
+                        type='submit'
                         variant='contained'
                         size='large'
                         color='primary'
                         className={classes.input}
                         onClick={handleSubmit}
+                        startIcon={<AssignmentIndIcon />}
                     >
                         Register
+                    </Button>
+                    <Button
+                        type='button'
+                        className={classes.input}
+                        variant='outlined'
+                        size='large'
+                        color='secondary'
+                        className={classes.input}
+                        startIcon={<LockOpenIcon />}
+                        onClick={redirectToSignIn}
+                    >
+                        Sign in
                     </Button>
                     {authError && <div className={classes.error}>{authError}</div>}
                 </form>
@@ -192,4 +211,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignUp)
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SignUp))

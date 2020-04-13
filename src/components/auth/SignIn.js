@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import { connect } from 'react-redux'
-import { Redirect } from 'react-router-dom'
+import { Redirect, withRouter } from 'react-router-dom'
 import { Grid, Typography, TextField, Button, Card } from '@material-ui/core'
 
+import AssignmentIndIcon from '@material-ui/icons/AssignmentInd'
 import LockOpenIcon from '@material-ui/icons/LockOpen'
 
 import { signIn } from '../../store/actions/authActions'
 import { useStyle } from './Styles'
 
-const SignIn = ({ authError, auth, signIn }) => {
+const SignIn = ({ authError, auth, signIn, history }) => {
     const [credentials, setCredentials] = useState({ email: '', password: '' })
     const classes = useStyle()
 
@@ -21,6 +22,9 @@ const SignIn = ({ authError, auth, signIn }) => {
     const handleSubmit = e => {
         e.preventDefault()
         signIn(credentials)
+    }
+    const redirectToSignUp = e => {
+        history.push('/signup')
     }
 
     if (auth.uid) return <Redirect to='/' />
@@ -61,6 +65,18 @@ const SignIn = ({ authError, auth, signIn }) => {
                     >
                         Login
                     </Button>
+                    <Button
+                        type='button'
+                        className={classes.input}
+                        variant='outlined'
+                        size='large'
+                        color='secondary'
+                        className={classes.input}
+                        startIcon={<AssignmentIndIcon />}
+                        onClick={redirectToSignUp}
+                    >
+                        Sign up
+                    </Button>
                     {authError && <div className={classes.error}>{authError}</div>}
                 </form>
             </Card>
@@ -81,4 +97,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignIn)
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SignIn))
