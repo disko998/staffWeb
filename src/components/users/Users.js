@@ -1,118 +1,94 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from 'react'
+import { connect } from 'react-redux'
+import { firestoreConnect } from 'react-redux-firebase'
+import { compose } from 'redux'
+import { Redirect } from 'react-router-dom'
+import { useToasts } from 'react-toast-notifications'
 
-import { connect } from "react-redux";
-import { firestoreConnect } from "react-redux-firebase";
-import { compose } from "redux";
-import { Redirect, Link } from "react-router-dom";
-import Budget from './Budget'
 import Strings from '../../utilities/Strings'
+import DataTable from '../layout/DataTable'
 
+function Users({ users, auth, firestore, authError }) {
+    if (!auth.uid) return <Redirect to='/signin' />
 
-export class Users extends Component {
+    const { addToast } = useToasts()
+    const [state, setState] = useState({
+        columns: [
+            { title: 'First Name', field: 'firstName' },
+            { title: 'Last Name', field: 'lastName' },
+            { title: 'Email', field: 'email' },
+            { title: 'Password', field: 'password' },
+        ],
+        data: [],
+    })
 
-  state = {
-    showUser: false,
-    currentUser: {}
-  }
+    useEffect(() => {
+        setState({ ...state, data: users })
+    }, [users])
 
-  allocateBudget = (user) => () => {
-    this.setState({ showUser: true, currentUser: user})
-  }
+    const onDelete = user => {
+        firestore.delete({ collection: 'users', doc: user.id })
+        addToast('User has been deleted', {
+            appearance: 'warning',
+            autoDismiss: true,
+        })
+    }
+    const onUpdate = user => {
+        firestore.update({ collection: 'users', doc: user.id }, user)
+        addToast('Successfully update user', {
+            appearance: 'info',
+            autoDismiss: true,
+        })
+    }
+    const onAdd = user => {
+        firestore.add(
+            { collection: 'users' },
+            {
+                ...user,
+                isSingleSite: 'true',
+                isSingleDep: 'true',
+                accountName: `${user.email.split('@')[0]}`,
+                orgType: '',
+                uid: auth.uid,
+            },
+        )
 
-  goBack = () => {
-    this.setState({ showUser: false, currentUser: {}})
-  }
-
-  render() {
-    const { auth } = this.props;
-    if (!auth.uid) return <Redirect to="/signin" />;
-    const { users } = this.props;
-    if (users && !this.state.showUser) {
-      return (
-        <div className="container">
-          <div className="card-panel ">
-            <div className="card-content black-text">
-              <span className="card-title">User List</span>
-              <br />
-              <br />
-              <br />
-              <div className="card-action">
-                <Link to="/adduser" className="btn">
-                  Add New User
-                </Link>
-                <br />
-                <br />
-                <br />
-                <table className="striped hoverable">
-                  <thead>
-                    <tr>
-                      <th>First Name</th>
-                      <th>Last Name</th>
-                      <th>Email</th>
-                      <th>Allocated Budget</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map(user => (
-                      <tr key={user.id} className="hoverable">
-                        <td>
-                          <Link to={`/showuser/${user.id}`}>
-                            {user.firstName}
-                          </Link>
-                        </td>
-                        <td>{user.lastName}</td>
-                        <td>{user.email}</td>
-                        <td>{user.budget || 0}</td>
-                        <td>
-                        {
-                          <td>
-                            <button onClick={this.allocateBudget(user)} className="btn btn-success">
-                              Allocate Budget
-                            </button>
-                          </td>
-                        }  
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+        addToast('New user was added to a list', {
+            appearance: 'success',
+            autoDismiss: true,
+        })
     }
 
-    if(this.state.showUser) {
-      return <Budget 
-        user={this.state.currentUser}
-        goBack={this.goBack}
-        auth={this.props.auth}
-        profile={this.props.profile}
-        firestore={this.props.firestore}
-      />
-    }
-
-    return null;
-  }
+    return (
+        <React.Fragment>
+            <DataTable
+                onRowDelete={onDelete}
+                onRowUpdate={onUpdate}
+                onRowAdd={onAdd}
+                title='Users'
+                columns={state.columns}
+                data={state.data}
+            />
+            {authError ? <p>{authError}</p> : null}
+        </React.Fragment>
+    )
 }
 
-const mapStateToProps = (state, ownProps) => {
-  console.log(state);
-
-  return {
+const mapStateToProps = state => ({
     users: state.firestore.ordered.Users,
     auth: state.firebase.auth,
-    profile: state.firebase.profile
-  };
-};
+    profile: state.firebase.profile,
+    authError: state.user.authError2,
+    deps: state.firestore.ordered.deps,
+    sites: state.firestore.ordered.sites,
+})
 
 export default compose(
-  connect(mapStateToProps),
-  firestoreConnect(props => [
-    {
-      collection: Strings.FS_COLLECTION_USERS,
-      where: ["uid", "==", props.auth.uid]
-    }
-  ])
-)(Users);
+    connect(mapStateToProps),
+    firestoreConnect(props => [
+        {
+            collection: Strings.FS_COLLECTION_USERS,
+            where: ['uid', '==', props.auth.uid],
+        },
+    ]),
+)(Users)
