@@ -7,5 +7,27 @@ export const useStyle = makeStyles(theme => ({
     row: {
         display: 'flex',
         flexDirection: 'row',
+        alignItems: 'center',
+        '& > *': {
+            marginRight: '15px',
+        },
+    },
+    chips: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    chip: {
+        margin: 2,
     },
 }))
+
+const ITEM_HEIGHT = 48
+const ITEM_PADDING_TOP = 8
+export const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
+    },
+}
