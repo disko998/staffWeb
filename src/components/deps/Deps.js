@@ -2,10 +2,13 @@ import React, { useEffect } from 'react'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
 import { compose } from 'redux'
+import { Redirect } from 'react-router-dom'
 
 import DataTable from '../layout/DataTable'
 
 function Deps({ deps, auth, firestore }) {
+    if (!auth.uid) return <Redirect to='/signin' />
+
     const [state, setState] = React.useState({
         columns: [
             { title: 'Dep Number', field: 'depNo', type: 'numeric' },

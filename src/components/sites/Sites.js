@@ -1,81 +1,65 @@
-import React, { Component } from "react";
+import React, { useEffect } from 'react'
+import { connect } from 'react-redux'
+import { firestoreConnect } from 'react-redux-firebase'
+import { compose } from 'redux'
+import { Redirect } from 'react-router-dom'
 
-import { connect } from "react-redux";
-import { firestoreConnect } from "react-redux-firebase";
-import { compose } from "redux";
-import { Redirect, Link } from "react-router-dom";
+import DataTable from '../layout/DataTable'
 
+function Sites({ sites, auth, firestore }) {
+    if (!auth.uid) return <Redirect to='/signin' />
 
-export class Sites extends Component {
-  render() {
-    const { auth } = this.props;
-    if (!auth.uid) return <Redirect to="/signin" />;
-    const { sites } = this.props;
-    if (sites) {
-      return (
-        <div className="container">
-          <div className="card-panel ">
-            <div className="card-content black-text">
-              <span className="card-title">Site List</span>
-              <br />
-              <br />
-              <br />
-              <div className="card-action">
-                <Link to="/addsite" className="btn">
-                  Add New Site
-                </Link>
-                <br />
-                <br />
-                <br />
-                <table className="striped hoverable">
-                  <thead>
-                    <tr>
-                      <th>Site Number</th>
-                      <th>Site Name</th>
-                      <th>Site Address</th>
-                      <th>Site Mangaer</th>
-                      <th>Site Telephone</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sites.map(site => (
-                      <tr key={site.id} className="hoverable">
-                        <td>
-                          <Link to={`/showsite/${site.id}`}>{site.siteNo}</Link>
-                        </td>
-                        <td>{site.siteName}</td>
-                        <td>{site.siteAdd}</td>
-                        <td>{site.siteManager}</td>
-                        <td>{site.siteTel}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+    const [state, setState] = React.useState({
+        columns: [
+            { title: 'Site Number', field: 'siteNo', type: 'numeric' },
+            { title: 'Site Name', field: 'siteName' },
+            { title: 'Site Address', field: 'siteAdd' },
+            { title: 'Site Manager', field: 'siteManager' },
+            { title: 'Site Telephone', field: 'siteTel', type: 'numeric' },
+        ],
+        data: [],
+    })
+    console.log(sites)
+
+    useEffect(() => {
+        setState({ ...state, data: sites })
+    }, [sites])
+
+    console.log(firestore)
+
+    const onDelete = site => {
+        firestore.delete({ collection: 'sites', doc: site.id })
     }
-    return null;
-  }
+    const onUpdate = site => {
+        firestore.update({ collection: 'sites', doc: site.id }, site)
+    }
+    const onAdd = site => {
+        firestore.add({ collection: 'sites' }, { ...site, uid: auth.uid })
+    }
+
+    return (
+        <DataTable
+            onRowDelete={onDelete}
+            onRowUpdate={onUpdate}
+            onRowAdd={onAdd}
+            title='Departments'
+            columns={state.columns}
+            data={state.data}
+        />
+    )
 }
 
-const mapStateToProps = (state, ownProps) => {
-  console.log(state);
-
-  return {
+const mapStateToProps = state => ({
     sites: state.firestore.ordered.sites,
-    auth: state.firebase.auth
-  };
-};
+    auth: state.firebase.auth,
+})
 
 export default compose(
-  connect(mapStateToProps),
-  firestoreConnect(props => [
-    {
-      collection: "sites",
-      where: ["uid", "==", props.auth.uid]
-    }
-  ])
-)(Sites);
+    connect(mapStateToProps),
+    firestoreConnect(props => [
+        {
+            collection: 'sites',
+            where: ['uid', '==', props.auth.uid],
+        },
+    ]),
+)(Sites)
