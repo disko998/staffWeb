@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Redirect, withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import { useToasts } from 'react-toast-notifications'
 import {
     Card,
     Grid,
@@ -24,6 +25,7 @@ import { signUp } from '../../store/actions/authActions'
 import { useStyle } from './Styles'
 
 const SignUp = ({ auth, authError, signUp, history }) => {
+    const { addToast } = useToasts()
     const classes = useStyle()
     const [userData, setUserData] = useState({
         email: '',
@@ -168,13 +170,11 @@ const SignUp = ({ auth, authError, signUp, history }) => {
                         </Select>
                     </FormControl>
                     <Button
-                        className={classes.button}
                         type='submit'
                         variant='contained'
                         size='large'
                         color='primary'
                         className={classes.input}
-                        onClick={handleSubmit}
                         startIcon={<AssignmentIndIcon />}
                     >
                         Register
@@ -185,13 +185,16 @@ const SignUp = ({ auth, authError, signUp, history }) => {
                         variant='outlined'
                         size='large'
                         color='secondary'
-                        className={classes.input}
                         startIcon={<LockOpenIcon />}
                         onClick={redirectToSignIn}
                     >
                         Sign in
                     </Button>
-                    {authError && <div className={classes.error}>{authError}</div>}
+                    {authError &&
+                        addToast(authError, {
+                            appearance: 'error',
+                            autoDismiss: true,
+                        })}
                 </form>
             </Card>
         </Grid>

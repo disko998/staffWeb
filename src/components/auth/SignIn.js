@@ -61,7 +61,6 @@ const SignIn = ({ authError, auth, signIn, history }) => {
                         color='primary'
                         className={classes.input}
                         startIcon={<LockOpenIcon />}
-                        onClick={handleSubmit}
                     >
                         Login
                     </Button>

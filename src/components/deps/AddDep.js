@@ -1,138 +1,125 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { Redirect, Link } from "react-router-dom";
-import { firestoreConnect } from "react-redux-firebase";
-import { compose } from "redux";
+import React, { useState } from 'react'
+import { connect } from 'react-redux'
+import { Redirect } from 'react-router-dom'
+import { firestoreConnect } from 'react-redux-firebase'
+import { compose } from 'redux'
+import { TextField, Button } from '@material-ui/core'
+import { useToasts } from 'react-toast-notifications'
 
-export class AddDep extends Component {
-  state = {
-    depName: "",
-    depNo: "",
-    depSite: "",
-    depManager: "",
-    depTel: ""
-  };
-  onSubmit = e => {
-    e.preventDefault();
+import SaveIcon from '@material-ui/icons/Save'
 
-    const itemAdd = {
-      depName: this.state.depName,
-      depNo: this.state.depNo,
-      depSite: this.state.depSite,
-      depManager: this.state.depManager,
-      depTel: this.state.depTel,
-      uid: this.props.auth.uid
-    };
-    console.log(itemAdd);
-    this.props.firestore.add({ collection: "deps" }, itemAdd);
+import FormWrapper from '../layout/FormWrapper'
+import { useAddDepStyle } from './Styles'
 
-    this.props.history.push("/deps/");
-  };
-  handleChange = e => {
-    this.setState({
-      [e.target.id]: e.target.value
-    });
-  };
+export const AddDep = ({ auth, firestore, history }) => {
+    if (!auth.uid) return <Redirect to='/signin' />
 
-  render() {
-    const { auth } = this.props;
-    if (!auth.uid) return <Redirect to="/signin" />;
-    console.log(auth);
+    const { addToast } = useToasts()
+    const classes = useAddDepStyle()
+    const [newDep, setNewDep] = useState({
+        depName: '',
+        depNo: '',
+        depSite: '',
+        depManager: '',
+        depTel: '',
+    })
+
+    const onSubmit = e => {
+        e.preventDefault()
+
+        // Adding department to a collection
+        firestore.add(
+            { collection: 'deps' },
+            {
+                ...newDep,
+                uid: auth.uid,
+            },
+        )
+
+        addToast('Added new department.', {
+            appearance: 'info',
+            autoDismiss: true,
+        })
+
+        // redirect to view
+        history.push('/deps/')
+    }
+    const handleChange = e => {
+        setNewDep({
+            [e.target.id]: e.target.value,
+        })
+    }
+
     return (
-      <div className="container">
-        <div className="card-panel ">
-          <span className="card-title">Add Department </span>
-          <br />
-          <br />
-          <br />
-          <div className="card-action" />
-          <Link to="/deps" className="btn">
-            Back to Department List
-          </Link>
-          <div className="panel-body">
-            <form onSubmit={this.onSubmit}>
-              <div className="form-group">
-                <label htmlFor="Department No">Department Number:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="depNo"
-                  id="depNo"
-                  onChange={this.handleChange}
-                  placeholder="Type Department Number"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="Department Name">Department Name:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="depName"
-                  id="depName"
-                  onChange={this.handleChange}
-                  placeholder="Type Department Name"
-                />
-              </div>{" "}
-              <div className="form-group">
-                <label htmlFor="Department Site">Department Site:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="depSite"
-                  id="depSite"
-                  onChange={this.handleChange}
-                  placeholder="Type Department Site"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="Department Manager">Department Mangaer:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="depManager"
-                  id="depManager"
-                  onChange={this.handleChange}
-                  placeholder="Type Department Manager Name"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="Department Telephone">
-                  Department Telephone:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="depTel"
-                  id="depTel"
-                  onChange={this.handleChange}
-                  placeholder="Type Department Telephone"
-                />
-              </div>
-              <button type="submit" className="btn btn-success">
-                Submit
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    );
-  }
+        <FormWrapper onSubmit={onSubmit} title='Add Department' onBack={history.goBack}>
+            <TextField
+                required
+                label='Department Number'
+                name='depNo'
+                id='depNo'
+                type='number'
+                onChange={handleChange}
+                className={classes.spacing}
+            />
+            <TextField
+                type='text'
+                required
+                label='Department Name'
+                name='depName'
+                id='depName'
+                onChange={handleChange}
+                className={classes.spacing}
+            />
+            <TextField
+                required
+                label='Department Site'
+                name='depSite'
+                id='depSite'
+                type='text'
+                onChange={handleChange}
+                className={classes.spacing}
+            />
+            <TextField
+                type='text'
+                required
+                label='Department Manager'
+                name='depManager'
+                id='depManager'
+                onChange={handleChange}
+                className={classes.spacing}
+            />
+            <TextField
+                required
+                label='Department Telephone'
+                id='depTel'
+                name='depTel'
+                type='tel'
+                onChange={handleChange}
+                className={classes.spacing}
+            />
+            <Button
+                type='submit'
+                variant='contained'
+                size='large'
+                color='primary'
+                className={classes.spacing}
+                startIcon={<SaveIcon />}
+            >
+                Save
+            </Button>
+        </FormWrapper>
+    )
 }
 
-const mapStateToProps = (state, ownProps) => {
-  //console.log(state);
-
-  return {
-    //deps: state.firestore.data.deps,
-    auth: state.firebase.auth
-  };
-};
+const mapStateToProps = state => ({
+    auth: state.firebase.auth,
+})
 
 export default compose(
-  connect(mapStateToProps),
-  firestoreConnect([
-    {
-      collection: "deps"
-    }
-  ])
-)(AddDep);
+    connect(mapStateToProps),
+    firestoreConnect([
+        {
+            collection: 'deps',
+        },
+    ]),
+)(AddDep)
