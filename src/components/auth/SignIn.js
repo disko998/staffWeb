@@ -59,7 +59,6 @@ const SignIn = ({ authError, auth, signIn, history }) => {
                         variant='contained'
                         size='large'
                         color='primary'
-                        className={classes.input}
                         startIcon={<LockOpenIcon />}
                     >
                         Login
@@ -70,7 +69,6 @@ const SignIn = ({ authError, auth, signIn, history }) => {
                         variant='outlined'
                         size='large'
                         color='secondary'
-                        className={classes.input}
                         startIcon={<AssignmentIndIcon />}
                         onClick={redirectToSignUp}
                     >

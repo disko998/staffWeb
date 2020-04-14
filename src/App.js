@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { BrowserRouter } from 'react-router-dom'
+import { Container } from '@material-ui/core'
 
 import RootRouter from './Router'
 import Navbar from './components/navigation/Navbar'
-import { Container } from '@material-ui/core'
 
 class App extends Component {
     render() {

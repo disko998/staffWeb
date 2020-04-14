@@ -9,8 +9,10 @@ import { Provider } from 'react-redux'
 import thunk from 'redux-thunk'
 import { reduxFirestore, getFirestore } from 'redux-firestore'
 import { reactReduxFirebase, getFirebase } from 'react-redux-firebase'
-import fbConfig from './config/fbConfig'
 import { ToastProvider } from 'react-toast-notifications'
+
+import 'semantic-ui-css/semantic.min.css'
+import fbConfig from './config/fbConfig'
 
 // Added Redux dev tools extension for chrome
 const composeEnhancers =
