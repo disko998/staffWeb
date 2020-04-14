@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { connect } from 'react-redux'
 import { firestoreConnect } from 'react-redux-firebase'
 import { compose } from 'redux'
 import { Redirect } from 'react-router-dom'
+import { useToasts } from 'react-toast-notifications'
 
 import DataTable from '../layout/DataTable'
 
 function Sites({ sites, auth, firestore }) {
     if (!auth.uid) return <Redirect to='/signin' />
 
-    const [state, setState] = React.useState({
+    const { addToast } = useToasts()
+    const [state, setState] = useState({
         columns: [
             { title: 'Site Number', field: 'siteNo', type: 'numeric' },
             { title: 'Site Name', field: 'siteName' },
@@ -19,22 +21,31 @@ function Sites({ sites, auth, firestore }) {
         ],
         data: [],
     })
-    console.log(sites)
 
     useEffect(() => {
         setState({ ...state, data: sites })
     }, [sites])
 
-    console.log(firestore)
-
     const onDelete = site => {
         firestore.delete({ collection: 'sites', doc: site.id })
+        addToast('Site has been deleted', {
+            appearance: 'warning',
+            autoDismiss: true,
+        })
     }
     const onUpdate = site => {
         firestore.update({ collection: 'sites', doc: site.id }, site)
+        addToast('Successfully update site', {
+            appearance: 'info',
+            autoDismiss: true,
+        })
     }
     const onAdd = site => {
         firestore.add({ collection: 'sites' }, { ...site, uid: auth.uid })
+        addToast('New site was added to a list', {
+            appearance: 'success',
+            autoDismiss: true,
+        })
     }
 
     return (
@@ -42,7 +53,7 @@ function Sites({ sites, auth, firestore }) {
             onRowDelete={onDelete}
             onRowUpdate={onUpdate}
             onRowAdd={onAdd}
-            title='Departments'
+            title='Sites'
             columns={state.columns}
             data={state.data}
         />
