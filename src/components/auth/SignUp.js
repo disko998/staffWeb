@@ -77,6 +77,7 @@ const SignUp = ({ auth, authError, signUp, history }) => {
                     </Typography>
                     <TextField
                         required
+                        type='email'
                         label='Email'
                         name='email'
                         onChange={handleChange}
@@ -92,6 +93,7 @@ const SignUp = ({ auth, authError, signUp, history }) => {
                     />
                     <TextField
                         required
+                        type='text'
                         label='First Name'
                         name='firstName'
                         onChange={handleChange}
@@ -99,6 +101,7 @@ const SignUp = ({ auth, authError, signUp, history }) => {
                     />
                     <TextField
                         required
+                        type='text'
                         label='Last Name'
                         name='lastName'
                         onChange={handleChange}
@@ -106,6 +109,7 @@ const SignUp = ({ auth, authError, signUp, history }) => {
                     />
                     <TextField
                         required
+                        type='text'
                         label='Account Name'
                         name='accountName'
                         onChange={handleChange}

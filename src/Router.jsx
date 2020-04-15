@@ -30,17 +30,17 @@ const RootRouter = () => (
         <Route path='/deps' component={Deps} />
         <Route path='/sites' component={Sites} />
         <Route path='/users' component={Users} />
+        <Route path='/createjob' component={CreateJob} />
+        <Route path='/settings' component={Settings} />
 
+        <Route path='/jobboard' component={JobBoard} />
         <Route path='/project/:id' component={ProjectDetails} />
         <Route path='/create' component={CreateProject} />
-        <Route path='/jobboard' component={JobBoard} />
-        <Route path='/createjob' component={CreateJob} />
 
         <Route path='/messages' component={Messages} />
-        <Route path='/settings' component={Settings} />
+        <Route path='/mobileApp' component={MobileApp} />
         <Route path='/tax' component={Tax} />
         <Route path='/fees' component={Fees} />
-        <Route path='/mobileApp' component={MobileApp} />
     </Switch>
 )
 

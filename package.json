@@ -16,7 +16,6 @@
     "react-datepicker": "^2.10.0",
     "react-dom": "^16.8.6",
     "react-google-maps": "^9.4.5",
-    "react-materialize": "^3.3.4",
     "react-redux": "^5.1.1",
     "react-redux-firebase": "^2.3.0",
     "react-router-dom": "^4.3.1",
@@ -25,8 +24,7 @@
     "redux": "^4.0.4",
     "redux-firestore": "^0.5.8",
     "redux-thunk": "^2.3.0",
-    "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.88.1"
+    "semantic-ui-css": "^2.4.1"
   },
   "scripts": {
     "start": "react-scripts start",
