@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core'
 
-export const useStyle = makeStyles(theme => ({
+export const useCreateJobStyle = makeStyles(theme => ({
     space: {
         margin: '15px 0',
     },
@@ -40,3 +40,37 @@ export const MenuProps = {
         },
     },
 }
+
+export const useJobBoardStyle = makeStyles(theme => ({
+    card: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+    },
+    button: {
+        background: 'green',
+        fontSize: 18,
+        color: '#fff',
+        marginBottom: 10,
+    },
+    vacant: {
+        background: '#2196f3',
+        '&:hover': {
+            background: '#1976d2',
+        },
+    },
+    filled: {
+        background: '#4caf50',
+        '&:hover': {
+            background: '#388e3c',
+        },
+    },
+    unfilled: {
+        background: '#f44336',
+        '&:hover': {
+            background: '#d32f2f',
+        },
+    },
+}))

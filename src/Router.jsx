@@ -3,22 +3,21 @@ import { Switch, Route } from 'react-router-dom'
 
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
-
 import Users from './components/users/Users'
 import Deps from './components/deps/Deps'
 import Sites from './components/sites/Sites'
-
-import Dashboard from './components/dashboard/Dashboard'
-import JobBoard from './components/dashboard/JobBoard'
-import CreateProject from './components/projects/CreateProject'
+import JobBoard from './components/jobs/JobBoard'
 import CreateJob from './components/jobs/CreateJob'
+import Settings from './components/settings/SettingsScreen'
+
+import CreateProject from './components/projects/CreateProject'
 import ProjectDetails from './components/projects/ProjectDetails'
 
 import Messages from './components/messages/MessageScreen'
-import Settings from './components/settings/SettingsScreen'
 import Tax from './components/tax/Tax'
 import Fees from './components/fees/Fees'
 import MobileApp from './components/mobileApp/MobileApp'
+import Dashboard from './components/dashboard/Dashboard'
 
 const RootRouter = () => (
     <Switch>

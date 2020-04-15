@@ -30,6 +30,8 @@ class JobBoard extends Component {
     const { auth } = this.props;
     if (!auth.uid) return <Redirect to="/signin" />;
     let { jobs } = this.props;
+
+    console.log(jobs);
     let vacantSize = 0;
     let filledSize = 0;
     let unfilledSize = 0;

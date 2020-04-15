@@ -28,13 +28,13 @@ import Strings, { Timeslots } from '../../utilities/Strings'
 import { formatDate } from '../../utilities/helper'
 import { Maps } from '../sites/Map'
 import { FormWrapper, Slots } from '../layout'
-import { useStyle, MenuProps } from './Styles'
+import { useCreateJobStyle, MenuProps } from './Styles'
 
 const CreateJob = ({ auth, deps, sites, profile, history }) => {
     if (!auth.uid) return <Redirect to='/signin' />
 
     const { addToast } = useToasts()
-    const classes = useStyle()
+    const classes = useCreateJobStyle()
     const [shift, setShift] = useState({
         jobNo: Math.floor(100000 + Math.random() * 900000),
         name: '',
