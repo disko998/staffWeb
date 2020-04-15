@@ -38,3 +38,26 @@ export const useAddDepStyle = makeStyles(theme => ({
         marginBottom: '15px !important',
     },
 }))
+
+export const useSlotsStyle = makeStyles(theme => ({
+    wrapper: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        '& > *': {
+            margin: 5,
+        },
+    },
+    slotContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        '& > *': {
+            margin: 2,
+        },
+    },
+}))

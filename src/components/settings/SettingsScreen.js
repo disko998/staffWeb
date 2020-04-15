@@ -1,256 +1,255 @@
-import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { signUp } from "../../store/actions/authActions";
-import * as M from "materialize-css";
-import { updateProfile, updateBudget } from "../../store/bidApi/bidApi";
-const stripe = window.Stripe("pk_test_POOtIVB0yOmKQynAjn7VoOEK");
+import React, { useState, useEffect } from 'react'
+import { Redirect } from 'react-router-dom'
+import { connect } from 'react-redux'
+import { TextField, Button } from '@material-ui/core'
+import { useToasts } from 'react-toast-notifications'
 
-class SettingsScreen extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      email: props.profile.email || "",
-      firstName: props.profile.firstName || "",
-      lastName: props.profile.lastName || "",
-      accountName: props.profile.accountName || "",
-      latitude: props.profile.latitude || "",
-      longitude: props.profile.longitude || "",
-      location:
-        !!props.profile.latitude && props.profile.longitude
-          ? `${props.profile.latitude}, ${props.profile.longitude}`
-          : "",
-      uid: props.auth.uid,
-      budget: props.profile.budget || "0"
-    };
-    setTimeout(() => {
-      M.updateTextFields();
-    }, 0);
-  }
+import { signUp } from '../../store/actions/authActions'
+import { updateProfile, updateBudget } from '../../store/bidApi/bidApi'
+import { FormWrapper } from '../layout'
+import { useStyle } from './Styles'
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.profile !== nextProps.profile) {
-      this.setState({
-        email: nextProps.profile.email || "",
-        firstName: nextProps.profile.firstName || "",
-        lastName: nextProps.profile.lastName || "",
-        accountName: nextProps.profile.accountName || "",
-        latitude: nextProps.profile.latitude || "",
-        longitude: nextProps.profile.longitude || "",
-        location:
-          !!nextProps.profile.latitude && nextProps.profile.longitude
-            ? `${nextProps.profile.latitude}, ${nextProps.profile.longitude}`
-            : "",
-        uid: nextProps.auth.uid,
-        budget: nextProps.profile.budget || "0"
-      });
-      setTimeout(() => {
-        M.updateTextFields();
-      }, 0);
-    }
-  }
+const stripe = window.Stripe('pk_test_POOtIVB0yOmKQynAjn7VoOEK')
 
-  componentDidMount() {
-    console.log(window.location.href);
-    if (window.location.href.includes("response")) {
-      let settingsData = localStorage.getItem("settingsData");
-      if (!!settingsData) {
-        settingsData = JSON.parse(settingsData);
-        this.setState(settingsData);
-        localStorage.removeItem("settingsData");
-        if (window.location.href.includes("success")) {
-          alert("Your account has been funded");
-          this.setState({ fund: "" });
-          updateBudget({
-            uid: settingsData.uid,
-            budget: Number(settingsData.budget) + Number(settingsData.fund)
-          });
-        } else {
-          alert("Payment failed. Please try again");
+const SettingsScreen = ({ profile, auth, history }) => {
+    if (!auth.uid) return <Redirect to='/signin' />
+
+    const { addToast } = useToasts()
+    const classes = useStyle()
+    const [userSettings, setUserSettings] = useState({
+        email: '',
+        firstName: '',
+        lastName: '',
+        accountName: '',
+        latitude: '',
+        longitude: '',
+        location: '',
+        uid: '',
+        budget: '0',
+    })
+    const {
+        email,
+        firstName,
+        lastName,
+        accountName,
+        latitude,
+        longitude,
+        location,
+        uid,
+        budget,
+        fund,
+    } = userSettings
+
+    useEffect(() => {
+        // Init state ith user data
+        setUserSettings({
+            email: profile.email || '',
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            accountName: profile.accountName || '',
+            latitude: profile.latitude || '',
+            longitude: profile.longitude || '',
+            location:
+                !!profile.latitude && profile.longitude
+                    ? `${profile.latitude}, ${profile.longitude}`
+                    : '',
+            uid: auth.uid,
+            budget: profile.budget || '0',
+        })
+
+        // Found Account
+        if (window.location.href.includes('response')) {
+            let settingsData = localStorage.getItem('settingsData')
+
+            if (!!settingsData) {
+                settingsData = JSON.parse(settingsData)
+                setUserSettings(settingsData)
+
+                localStorage.removeItem('settingsData')
+
+                if (window.location.href.includes('success')) {
+                    alert('Your account has been funded')
+                    setUserSettings({ fund: '' })
+                    updateBudget({
+                        uid: settingsData.uid,
+                        budget: Number(settingsData.budget) + Number(settingsData.fund),
+                    })
+                } else {
+                    alert('Payment failed. Please try again')
+                }
+            }
         }
-      }
+    }, [profile, auth])
+
+    const handleChange = e => {
+        setUserSettings({
+            ...userSettings,
+            [e.target.name]: e.target.value,
+        })
     }
-  }
 
-  handleChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value
-    });
-    console.log(this.state);
-  };
+    const handleSubmit = e => {
+        e.preventDefault()
+        updateProfile(userSettings)
+    }
 
-  handleSubmit = e => {
-    e.preventDefault();
-    updateProfile(this.state);
-  };
+    const useCurrentLocation = () => {
+        navigator.geolocation.getCurrentPosition(
+            position =>
+                setUserSettings({
+                    ...userSettings,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                }),
+            addToast('Location was found, please save settings!', {
+                appearance: 'info',
+                autoDismiss: true,
+            }),
+            err =>
+                addToast('Please share your location', {
+                    appearance: 'warning',
+                    autoDismiss: true,
+                }),
+        )
+    }
 
-  useCurrentLocation = e => {
-    e.preventDefault();
-    navigator.geolocation.getCurrentPosition(
-      position =>
-        this.setState(
-          {
-            latitude: position.coords.latitude.toFixed(5),
-            longitude: position.coords.longitude.toFixed(5)
-          },
-          () => {
-            updateProfile(this.state);
-          }
-        ),
-      err => alert("Please share your location")
-    );
-  };
+    const addFunds = e => {
+        e.preventDefault()
 
-  addFunds = e => {
-    e.preventDefault();
+        const orderData = {
+            name: firstName,
+            amount: Number(fund),
+            customerId: profile.stripe_id,
+            customer_email: email,
+        }
 
-    const orderData = {
-      name: this.state.firstName,
-      amount: Number(this.state.fund),
-      customerId: this.props.profile.stripe_id,
-      customer_email: this.state.email
-    };
-    console.log("email = " + this.state.email);
+        // Call Firebase function for checkout
+        fetch(
+            'https://us-central1-staffa-13e8a.cloudfunctions.net/createCheckoutSession/',
+            {
+                method: 'POST',
+                body: JSON.stringify(orderData),
+            },
+        )
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+                localStorage.setItem('settingsData', JSON.stringify(userSettings))
 
-    // Url to Firebase function
-    fetch(
-      "https://us-central1-staffa-13e8a.cloudfunctions.net/createCheckoutSession/",
-      {
-        method: "POST",
-        body: JSON.stringify(orderData)
-      }
-    )
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        localStorage.setItem("settingsData", JSON.stringify(this.state));
-        // Redirecting to payment form page
-        stripe
-          .redirectToCheckout({
-            sessionId: data.sessionId
-          })
-          .then(function(result) {
-            result.error.message;
-          });
-      });
-  };
+                // Redirecting to payment form page
+                stripe
+                    .redirectToCheckout({
+                        sessionId: data.sessionId,
+                    })
+                    .then(function (result) {
+                        result.error.message
+                    })
+            })
+    }
 
-  render() {
-    const { auth, authError } = this.props;
-    if (!auth.uid) return <Redirect to="/signin" />;
+    const redirectToJobBoard = e => history.push('/jobboard')
+
     return (
-      <div className="container">
-        <form className="white">
-          <h5 className="grey-text text-darken-3">Settings</h5>
-          <div className="input-field">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              onChange={this.handleChange}
-              disabled
-              value={this.state.email}
+        <FormWrapper onSubmit={handleSubmit} title='Settings' onBack={redirectToJobBoard}>
+            <TextField
+                required
+                type='email'
+                label='Email'
+                disabled
+                id='email'
+                name='email'
+                value={email}
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="firstName">First Name</label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              onChange={this.handleChange}
-              value={this.state.firstName}
+            <TextField
+                required
+                type='text'
+                label='First Name'
+                id='firstName'
+                name='firstName'
+                value={firstName}
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="lastName">Last Name</label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              onChange={this.handleChange}
-              value={this.state.lastName}
+            <TextField
+                required
+                type='text'
+                label='Last Name'
+                id='lastName'
+                name='lastName'
+                value={lastName}
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="accountName">Account Name</label>
-            <input
-              type="text"
-              id="accountName"
-              name="accountName"
-              onChange={this.handleChange}
-              value={this.state.accountName}
+            <TextField
+                required
+                type='text'
+                label='Account Name'
+                id='accountName'
+                name='accountName'
+                value={accountName}
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="accountName">Current Budget</label>
-            <input
-              type="number"
-              id="budget"
-              name="budget"
-              onChange={this.handleChange}
-              value={this.state.budget}
+            <TextField
+                required
+                type='number'
+                label='Current Budget'
+                id='budget'
+                name='budget'
+                value={budget}
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="defaultLocation">Default Location</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              disabled
-              value={this.state.location}
+            <TextField
+                required
+                type='text'
+                label='Default Location'
+                id='location'
+                name='location'
+                value={location}
+                disabled
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <label htmlFor="accountName">Fund Amount</label>
-            <input
-              type="number"
-              id="fund"
-              name="fund"
-              onChange={this.handleChange}
+            <TextField
+                type='number'
+                label='Found Amount'
+                id='fund'
+                name='fund'
+                onChange={handleChange}
+                className={classes.space}
             />
-          </div>
-          <div className="input-field">
-            <button className="btn" onClick={this.handleSubmit}>
-              Update Settings
-            </button>
-            <button
-              onClick={this.useCurrentLocation}
-              className="btn btn-success"
-              style={{ marginLeft: "10px", marginRight: "10px" }}
-            >
-              Set Current Location
-            </button>
-            {this.props.profile.isAdmin && this.state.fund && (
-              <button
-                onClick={this.addFunds}
-                className="btn btn-success"
-                style={{ marginLeft: "10px" }}
-              >
-                Add Funds
-              </button>
-            )}
-          </div>
-        </form>
-      </div>
-    );
-  }
+            <div className={`${classes.row} ${classes.space}`}>
+                <Button type='submit' variant='contained' color='primary'>
+                    Update settings
+                </Button>
+                <Button onClick={useCurrentLocation} variant='contained' color='primary'>
+                    Set current location
+                </Button>
+                {profile.isAdmin && fund && (
+                    <Button onClick={addFunds} variant='contained' color='primary'>
+                        Add founds
+                    </Button>
+                )}
+            </div>
+        </FormWrapper>
+    )
 }
 
 const mapStateToProps = state => {
-  return {
-    auth: state.firebase.auth,
-    profile: state.firebase.profile
-  };
-};
+    return {
+        auth: state.firebase.auth,
+        profile: state.firebase.profile,
+    }
+}
 
 const mapDispatchToProps = dispatch => {
-  return {
-    signUp: creds => dispatch(signUp(creds))
-  };
-};
+    return {
+        signUp: creds => dispatch(signUp(creds)),
+    }
+}
 
-export default connect(mapStateToProps, mapDispatchToProps)(SettingsScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(SettingsScreen)

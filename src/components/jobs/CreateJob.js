@@ -20,41 +20,15 @@ import {
 } from '@material-ui/core'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
 
-import AddCircleIcon from '@material-ui/icons/AddCircle'
 import MyLocationIcon from '@material-ui/icons/MyLocation'
 import LocationOnIcon from '@material-ui/icons/LocationOn'
 import NoteAddIcon from '@material-ui/icons/NoteAdd'
 
+import Strings, { Timeslots } from '../../utilities/Strings'
 import { formatDate } from '../../utilities/helper'
-import FormWrapper from '../layout/FormWrapper'
+import { Maps } from '../sites/Map'
+import { FormWrapper, Slots } from '../layout'
 import { useStyle, MenuProps } from './Styles'
-
-const Timeslots = [
-    '00:00',
-    '1:00',
-    '2:00',
-    '3:00',
-    '4:00',
-    '5:00',
-    '6:00',
-    '7:00',
-    '8:00',
-    '9:00',
-    '10:00',
-    '11:00',
-    '12:00',
-    '13:00',
-    '14:00',
-    '15:00',
-    '16:00',
-    '17:00',
-    '18:00',
-    '19:00',
-    '20:00',
-    '21:00',
-    '22:00',
-    '23:00',
-]
 
 const CreateJob = ({ auth, deps, sites, profile, history }) => {
     if (!auth.uid) return <Redirect to='/signin' />
@@ -67,7 +41,6 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
         site: '',
         dep: '',
         cost: '',
-        showFundShift: false,
         showSubmitButton: false,
         latitude: '',
         longitude: '',
@@ -75,8 +48,98 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
         slots: {},
         currentSlot: [],
     })
+    const {
+        jobNo,
+        name,
+        site,
+        dep,
+        cost,
+        latitude,
+        longitude,
+        startDate,
+        slots,
+        firestore,
+    } = shift
 
-    console.log(shift)
+    const validateBeforeSubmit = () => {
+        //Validate inputs
+        const isValid =
+            jobNo &&
+            name &&
+            //site &&
+            //dep &&
+            cost &&
+            latitude &&
+            longitude &&
+            Object.keys(slots).length
+
+        !isValid &&
+            addToast('Please fill out the form correctly', {
+                appearance: 'error',
+                autoDismiss: true,
+            })
+
+        // Validate founds
+        const number = Object.values(slots).reduce((next, s) => {
+            return (next += s.length)
+        }, 0)
+        const totalCost = number * cost
+
+        if (profile.budget < totalCost) {
+            addToast(
+                'Insufficient funds in the account. Please add more funds or tell your owner to allocate more',
+                {
+                    appearance: 'error',
+                    autoDismiss: true,
+                },
+            )
+            return false
+        }
+
+        return true
+    }
+
+    const handleSubmit = e => {
+        e.preventDefault()
+        if (!validateBeforeSubmit()) return
+
+        const itemToAdd = {
+            jobNo,
+            Name: name,
+            site,
+            dep,
+            cost,
+            type: 'Vacant',
+            uid: auth.uid,
+            latitude: latitude,
+            longitude: longitude,
+            slots: slots,
+            agencyName: `${profile.firstName} ${profile.lastName}`,
+        }
+
+        // this.props.firestore.add({ collection: "jobs" }, itemToAdd);
+
+        fetch(`${Strings.BASE_URL}/saveJobs`, {
+            method: 'POST',
+            body: JSON.stringify(itemToAdd),
+        })
+            .then(response => {
+                console.log('Cloud function response', response)
+
+                const number = Object.values(slots).reduce((next, s) => {
+                    return (next += s.length)
+                }, 0)
+                const totalCost = number * cost
+                const budget = profile.budget - totalCost
+
+                firestore.update({ collection: 'Users', doc: auth.uid }, { budget })
+
+                redirectToJobBoard()
+            })
+            .catch(err => {
+                console.error(err)
+            })
+    }
 
     const handleChange = e => {
         setShift({
@@ -92,7 +155,7 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
         })
     }
 
-    const addSlot = () => {
+    const onAddSlot = () => {
         const formattedDate = formatDate(shift.startDate)
         setShift({
             ...shift,
@@ -102,14 +165,43 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
         })
     }
 
-    const handleSubmit = e => {
-        e.preventDefault()
+    const onSlotRemove = key => {
+        const copySlots = shift.slots
+        delete copySlots[key]
+        setShift({
+            ...shift,
+            slots: copySlots,
+        })
     }
 
-    const redirectToSignIn = e => history.push('/signin')
+    const useCurrentLocation = () => {
+        navigator.geolocation.getCurrentPosition(
+            position =>
+                setShift({
+                    ...shift,
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                }),
+            err =>
+                addToast('Please share your location', {
+                    appearance: 'warning',
+                    autoDismiss: true,
+                }),
+        )
+    }
+
+    const useSavedLocation = () => {
+        setShift({
+            ...shift,
+            latitude: Number(profile.latitude),
+            longitude: Number(profile.longitude),
+        })
+    }
+
+    const redirectToJobBoard = e => history.push('/jobboard')
 
     const renderTimePicker = (
-        <FormControl required>
+        <FormControl variant='outlined' required className={classes.datePicker}>
             <InputLabel id='time'>Time</InputLabel>
             <Select
                 labelId='time'
@@ -120,7 +212,6 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
                 onChange={handleChange}
                 label='Time'
                 MenuProps={MenuProps}
-                input={<Input />}
                 renderValue={selected => (
                     <div className={classes.chips}>
                         {selected.map(value => (
@@ -140,7 +231,11 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
     )
 
     return (
-        <FormWrapper onSubmit={handleSubmit} title='Create Job' onBack={redirectToSignIn}>
+        <FormWrapper
+            onSubmit={handleSubmit}
+            title='Create Job'
+            onBack={redirectToJobBoard}
+        >
             <TextField
                 required
                 type='number'
@@ -162,9 +257,11 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
                 onChange={handleChange}
                 className={classes.space}
             />
+            <Slots slots={shift.slots} onRemove={onSlotRemove} />
             <div className={`${classes.row} ${classes.space}`}>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <KeyboardDatePicker
+                        className={classes.datePicker}
                         required
                         margin='normal'
                         id='startDate'
@@ -180,14 +277,15 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
                 </MuiPickersUtilsProvider>
                 {renderTimePicker}
                 {!!shift.currentSlot.length && (
-                    <IconButton
-                        onClick={addSlot}
+                    <Button
+                        onClick={onAddSlot}
+                        variant='contained'
                         aria-label='add'
-                        color='primary'
-                        size='medium'
+                        color='secondary'
+                        style={{ margin: 5 }}
                     >
-                        <AddCircleIcon fontSize='large' />
-                    </IconButton>
+                        Add
+                    </Button>
                 )}
             </div>
             <div className={`${classes.row} ${classes.space}`}>
@@ -197,55 +295,70 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
                     color='secondary'
                     className={classes.button}
                     startIcon={<MyLocationIcon />}
+                    onClick={useCurrentLocation}
                 >
-                    Get location
+                    Get current location
                 </Button>
                 <Button
+                    onClick={useSavedLocation}
                     variant='contained'
                     color='secondary'
                     className={classes.button}
                     startIcon={<LocationOnIcon />}
                 >
-                    Saved location
+                    Use Saved location
                 </Button>
             </div>
-            <FormControl required variant='outlined' className={classes.space}>
+            {!!shift.latitude && !!shift.longitude && (
+                <div style={{ margin: '20px 0' }}>
+                    <Maps
+                        isMarkerShown
+                        markerPosition={{
+                            lat: shift.latitude,
+                            lng: shift.longitude,
+                        }}
+                    />
+                </div>
+            )}
+            <FormControl
+                required
+                variant='outlined'
+                className={`${classes.formControl} ${classes.space}`}
+            >
                 <InputLabel id='sites'>Sites</InputLabel>
                 <Select
                     labelId='sites'
-                    id='sites'
-                    value={[]}
+                    id='site'
+                    name='site'
+                    value={shift.site}
                     onChange={handleChange}
                     label='Sites'
                 >
-                    <MenuItem value=''>
-                        <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
+                    {sites &&
+                        sites.map(site => (
+                            <MenuItem value={site.siteName}>{site.siteName}</MenuItem>
+                        ))}
                 </Select>
             </FormControl>
-            <FormControl required variant='outlined' className={classes.space}>
+            <FormControl required variant='outlined' className={classes.formControl}>
                 <InputLabel id='deps'>Departments</InputLabel>
                 <Select
                     labelId='deps'
-                    id='deps'
-                    value={[]}
+                    id='dep'
+                    name='dep'
+                    value={shift.dep}
                     onChange={handleChange}
                     label='Departments'
                 >
-                    <MenuItem value=''>
-                        <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
+                    {deps &&
+                        deps.map(dep => (
+                            <MenuItem value={dep.depName}>{dep.depName}</MenuItem>
+                        ))}
                 </Select>
             </FormControl>
             <TextField
                 required
-                type='text'
+                type='number'
                 label='Cost'
                 id='cost'
                 name='cost'
@@ -261,7 +374,7 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
                 color='primary'
                 startIcon={<NoteAddIcon />}
             >
-                Create Job
+                submit
             </Button>
         </FormWrapper>
     )

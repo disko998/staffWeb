@@ -7,9 +7,11 @@ export const useStyle = makeStyles(theme => ({
     row: {
         display: 'flex',
         flexDirection: 'row',
+        flexWrap: 'wrap',
         alignItems: 'center',
+        justifyContent: 'flex-start',
         '& > *': {
-            marginRight: '15px',
+            margin: '5px 15px',
         },
     },
     chips: {
@@ -18,6 +20,13 @@ export const useStyle = makeStyles(theme => ({
     },
     chip: {
         margin: 2,
+    },
+    formControl: {
+        minWidth: 150,
+    },
+    datePicker: {
+        minWidth: 200,
+        margin: 10,
     },
 }))
 
