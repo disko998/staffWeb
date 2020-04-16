@@ -36,7 +36,7 @@ const JobBoard = ({ jobs, auth, history }) => {
     }
 
     return (
-        <Box mt={5}>
+        <Box mt={5} mb={5}>
             <Grid container spacing={3}>
                 <Grid item xs={12} sm={4} className={classes.card}>
                     <Fab

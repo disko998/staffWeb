@@ -12,7 +12,6 @@ import Settings from './components/settings/SettingsScreen'
 
 import CreateProject from './components/projects/CreateProject'
 import ProjectDetails from './components/projects/ProjectDetails'
-
 import Messages from './components/messages/MessageScreen'
 import Tax from './components/tax/Tax'
 import Fees from './components/fees/Fees'
@@ -25,21 +24,19 @@ const RootRouter = () => (
 
         <Route path='/signin' component={SignIn} />
         <Route path='/signup' component={SignUp} />
-
         <Route path='/deps' component={Deps} />
         <Route path='/sites' component={Sites} />
         <Route path='/users' component={Users} />
         <Route path='/createjob' component={CreateJob} />
         <Route path='/settings' component={Settings} />
-
         <Route path='/jobboard' component={JobBoard} />
-        <Route path='/project/:id' component={ProjectDetails} />
-        <Route path='/create' component={CreateProject} />
 
         <Route path='/messages' component={Messages} />
-        <Route path='/mobileApp' component={MobileApp} />
         <Route path='/tax' component={Tax} />
         <Route path='/fees' component={Fees} />
+        <Route path='/mobileApp' component={MobileApp} />
+        <Route path='/project/:id' component={ProjectDetails} />
+        <Route path='/create' component={CreateProject} />
     </Switch>
 )
 

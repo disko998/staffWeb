@@ -105,7 +105,7 @@ const CreateJob = ({ auth, deps, sites, profile, history }) => {
 
         const itemToAdd = {
             jobNo,
-            Name: name,
+            name,
             site,
             dep,
             cost,
