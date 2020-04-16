@@ -1,6 +1,7 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 
+import Dashboard from './components/dashboard/Dashboard'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
 import Users from './components/users/Users'
@@ -10,18 +11,13 @@ import JobBoard from './components/jobs/JobBoard'
 import CreateJob from './components/jobs/CreateJob'
 import Settings from './components/settings/SettingsScreen'
 
-import CreateProject from './components/projects/CreateProject'
-import ProjectDetails from './components/projects/ProjectDetails'
 import Messages from './components/messages/MessageScreen'
 import Tax from './components/tax/Tax'
 import Fees from './components/fees/Fees'
-import MobileApp from './components/mobileApp/MobileApp'
-import Dashboard from './components/dashboard/Dashboard'
 
 const RootRouter = () => (
     <Switch>
         <Route exact path='/' component={Dashboard} />
-
         <Route path='/signin' component={SignIn} />
         <Route path='/signup' component={SignUp} />
         <Route path='/deps' component={Deps} />
@@ -34,9 +30,6 @@ const RootRouter = () => (
         <Route path='/messages' component={Messages} />
         <Route path='/tax' component={Tax} />
         <Route path='/fees' component={Fees} />
-        <Route path='/mobileApp' component={MobileApp} />
-        <Route path='/project/:id' component={ProjectDetails} />
-        <Route path='/create' component={CreateProject} />
     </Switch>
 )
 

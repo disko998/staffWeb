@@ -1,39 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import './index.css'
-import App from './App'
-import registerServiceWorker from './registerServiceWorker'
-import { createStore, applyMiddleware, compose } from 'redux'
-import rootReducer from './store/reducers/rootReducer'
 import { Provider } from 'react-redux'
-import thunk from 'redux-thunk'
-import { reduxFirestore, getFirestore } from 'redux-firestore'
-import { reactReduxFirebase, getFirebase } from 'react-redux-firebase'
 import { ToastProvider } from 'react-toast-notifications'
 
+import registerServiceWorker from './registerServiceWorker'
+import { store } from './store/index'
+import App from './App'
+
 import 'semantic-ui-css/semantic.min.css'
-import fbConfig from './config/fbConfig'
-
-// Added Redux dev tools extension for chrome
-const composeEnhancers =
-    typeof window === 'object' && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-              // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
-          })
-        : compose
-
-const store = createStore(
-    rootReducer,
-    composeEnhancers(
-        applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
-        reactReduxFirebase(fbConfig, {
-            userProfile: 'Users',
-            useFirestoreForProfile: true,
-            attachAuthIsReady: true,
-        }),
-        reduxFirestore(fbConfig), // redux bindings for firestore
-    ),
-)
+import './index.css'
 
 store.firebaseAuthIsReady.then(() => {
     ReactDOM.render(
